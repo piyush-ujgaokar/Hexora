@@ -25,8 +25,8 @@ export const loginController=async(req,res)=>{
 
         await redis.set(`session-${sessionId}`,JSON.stringify({
             name:user.name,
-            userId:user._id,
-            emal:user.email,
+            _id:user._id,
+            email:user.email,
             avatar:user.avatar
         }),"EX",7*24*60*60)
 
@@ -34,17 +34,14 @@ export const loginController=async(req,res)=>{
         res.cookie("session",sessionId,{
             httpOnly:true,
             secure:false,
-            samesite:"strict",
+            sameSite:"strict",
             maxAge:7*24*60*60*1000
         })
 
 
         return res.status(200).json({
             message:"User Login Successfully",
-            user:{
-                name:user.name,
-                email:user.email
-            }
+            user:user
         })
 
     } catch (error) {
