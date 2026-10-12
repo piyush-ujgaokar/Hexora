@@ -6,10 +6,12 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import Navbar from "../components/Navbar";
+import SideBar from "../components/SideBar";
+import { Plus } from "lucide-react";
 
 const DashBoard = () => {
   const [loading, setLoading] = useState(false);
-
+    const [activeSession, setActiveSession] = useState("projects")
   const dispatch=useDispatch()
   const {userData}=useSelector(state=>state.user)
 
@@ -73,11 +75,33 @@ const DashBoard = () => {
     <div className="relative flex min-h-0 flex-1 flex-col">
 
     <Navbar/>
+    <div className="flex min-h-0 flex-1">
+        <SideBar activeSession={activeSession} setActiveSession={setActiveSession}/>
+
+        <div className='min-h-0 flex-1 overflow-y-auto px-8 py-8 [scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.35)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-clip-padding hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 dark:hover:[&::-webkit-scrollbar-thumb]:bg-white/20'>
+            <div className="mb-8 flex items-start justify-between">
+
+                <div>
+                    <h1 className="flex items-center gap-2 text-[26px] font-bold text-slate-900 dark:text-white  ">Welcome Back, {" "}
+                        {(userData.name).split(" ")[0] || "User"}
+                        <span>👋</span>
+                        </h1>
+
+                    <p className="mt-1 text-[13.5px] text-slate-500 dark:text-slate-400  ">Ready to build Something Amazing Today ?</p>
+                </div>
+                <button className='flex cursor-pointer shrink-0 items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-sm transition-opacity duration-150 hover:opacity-90 dark:bg-white dark:text-slate-900'>
+                    <Plus size={16}/>
+                    New Project
+                </button>
+
+            </div>
+
+        </div>
+
 
     </div>
 
-
-
+    </div>
 
     </div>
   )
