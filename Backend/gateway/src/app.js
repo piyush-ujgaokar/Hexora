@@ -27,6 +27,7 @@ app.use(
     },
   }),
 );
+
 app.use(
   "/api/project",
   authMiddleware,
