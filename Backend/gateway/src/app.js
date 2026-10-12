@@ -7,6 +7,7 @@ import morgan from "morgan";
 import proxy from "express-http-proxy";
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import { getCurrentUser } from "./controllers/user.controller.js";
+import { proxyWithheader } from "./utils/proxyWithheader.js";
 
 const app = express();
 
@@ -28,15 +29,7 @@ app.use(
   }),
 );
 
-app.use(
-  "/api/project",
-  authMiddleware,
-  proxy(process.env.PROJECT_SERVICE, {
-    proxyReqPathResolver: (req) => {
-      return `/project${req.url}`;
-    },
-  }),
-);
+app.use("/api/project",authMiddleware,proxyWithheader(process.env.PROJECT_SERVICE));
 app.get("/api/me", authMiddleware, getCurrentUser);
 
 app.get("/", (req, res) => {
