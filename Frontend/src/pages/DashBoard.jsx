@@ -5,6 +5,7 @@ import { loginApi } from "../features/api/login";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice";
+import Navbar from "../components/Navbar";
 
 const DashBoard = () => {
   const [loading, setLoading] = useState(false);
@@ -62,9 +63,21 @@ const DashBoard = () => {
     </div>
   );
   }
-
   return (
-    <div>
+    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-slate-50 transition-colors duration-300 dark:bg-[#07070c]">
+        <div className="pointer-events-none absolute -top-40 left-1/3 hidden h-[700px] w-[700px] rounded-full bg-white/[0.04] blur-[140px] dark:block " />
+        <div className="pointer-events-none absolute right-0 top-1/3 hidden 
+        h-[500px] w-[500px] rounded-full bg-white/[0.03] blur-[130px] dark:block    " />
+
+
+    <div className="relative flex min-h-0 flex-1 flex-col">
+
+    <Navbar/>
+
+    </div>
+
+
+
 
     </div>
   )
