@@ -137,6 +137,13 @@ export const toggleStar = async (req, res) => {
   try {
 
     const { id } = req.params;
+      const userId = req.headers["x-user-id"];
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "userid is Required",
+      });
+    }
 
     const project = await projectModel.findById(id);
     if (!project) {
@@ -148,6 +155,7 @@ export const toggleStar = async (req, res) => {
     await project.save();
   const key=`starred-projects-${userId}`
     await redis.del(key)
+    await redis.del(`projects-${userId}`)
 
     return res.status(200).json({
       message: "Project Starred Toggled Successfully",
@@ -164,11 +172,19 @@ export const deleteProject = async (req, res) => {
   try {
 
     const { id } = req.params;
+    const userId = req.headers["x-user-id"];
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "userid is Required",
+      });
+    }
 
     const project = await projectModel.findByIdAndDelete(id);
 
     const key=`projects-${userId}`
     await redis.del(key)
+    await redis.del(`starred-projects-${userId}`)
 
     if (!project) {
       return res.status(404).json({

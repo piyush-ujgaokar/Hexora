@@ -9,16 +9,19 @@ import Navbar from "../components/Navbar";
 import SideBar from "../components/SideBar";
 import { Folder, Loader2, Plus } from "lucide-react";
 import { getProjects, getStarredProjects } from "../features/api/project";
-import { setProjects, setStarredProjects } from "../redux/projectSlice";
+import { setProjects } from "../redux/projectSlice";
 import { useEffect } from "react";
+import ProjectCard from "../components/ProjectCard";
+import CreateProjectModal from "../components/CreateProjectModal";
 
 const DashBoard = () => {
   const [loading, setLoading] = useState(false);
+  const [openModal, setOpenModal] = useState(false)
   const [activeSession, setActiveSession] = useState("projects");
   const [loadingProjects, setLoadingProjects] = useState(false);
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.user);
-  const { projects, starredProjects } = useSelector((state) => state.project);
+  const { projects } = useSelector((state) => state.project);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -43,7 +46,7 @@ const DashBoard = () => {
   const fetchStarredProjects = async () => {
     setLoadingProjects(true);
     const data = await getStarredProjects();
-    dispatch(setStarredProjects(data));
+    dispatch(setProjects(data));
     setLoadingProjects(false);
   };
 
@@ -120,7 +123,7 @@ const DashBoard = () => {
                   Ready to build Something Amazing Today ?
                 </p>
               </div>
-              <button className="flex cursor-pointer shrink-0 items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-sm transition-opacity duration-150 hover:opacity-90 dark:bg-white dark:text-slate-900">
+              <button onClick={()=>setOpenModal(true)} className="flex cursor-pointer shrink-0 items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-sm transition-opacity duration-150 hover:opacity-90 dark:bg-white dark:text-slate-900">
                 <Plus size={16} />
                 New Project
               </button>
@@ -141,7 +144,7 @@ const DashBoard = () => {
                   className="animate-spin text-slate-400 dark:text-slate-500 "
                 />
               </div>
-            ) : (activeSession == "starred" ? starredProjects : projects).length == 0 ? (
+            ) : projects.length == 0 ? (
               <div className="mb-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/40 py-16 text-center dark:border-white/[0.1] dark:bg-white/[0.01]">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900/5 dark:bg-white/10">
                   <Folder
@@ -155,11 +158,23 @@ const DashBoard = () => {
 
               </div>
             ) : (
-              <></>
+             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 ">
+                {projects.map((p,i)=>(
+                    <ProjectCard project={p} activeSession={activeSession}/>
+                ))}
+             </div>
             )}
           </div>
         </div>
       </div>
+{openModal && <CreateProjectModal 
+    open={openModal} 
+    onClose={()=>setOpenModal(false)}
+    />}
+   
+
+
+
     </div>
   );
 };
