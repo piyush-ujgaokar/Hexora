@@ -35,6 +35,12 @@ app.use("/api/project",authMiddleware,proxyWithheader(process.env.PROJECT_SERVIC
     },
 }));
 
+app.use("/api/file",proxyWithheader(process.env.FILE_SERVICE,{
+    proxyReqPathResolver: (req) => {
+      return `/file${req.url}`;
+    },
+}));
+
 app.get("/api/me", authMiddleware, getCurrentUser);
 
 app.get("/", (req, res) => {
