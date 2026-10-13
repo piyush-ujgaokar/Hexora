@@ -9,7 +9,7 @@ app.use(cookieParser())
 app.use(express.json())
 
 
-app.use("/",projectRoutes)
+app.use("/project",projectRoutes)
 
 app.get("/",(req,res)=>{
     return res.status(200).json({

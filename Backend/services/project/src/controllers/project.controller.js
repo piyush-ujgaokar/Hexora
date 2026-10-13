@@ -48,7 +48,6 @@ export const getProjects = async (req, res) => {
     let result=await redis.get(key)
     if(result){
         return   res.status(200).json({
-      message: "Fetched All Projects Successfully",
       project: JSON.parse(result),
     });
     }
@@ -62,7 +61,6 @@ export const getProjects = async (req, res) => {
     await redis.set(key,JSON.stringify(projects))
 
     res.status(200).json({
-      message: "Fetched All Projects Successfully",
       project: projects,
     });
 
@@ -108,27 +106,25 @@ export const getStarredProjects = async (req, res) => {
     }
 
     const key=`starred-projects-${userId}`
-    const result=await res.get(key)
+    const result=await redis.get(key)
 
     if(result){
-        return   res.status(200).json({
-      message: "Fetched All Projects Successfully",
-      project: JSON.parse(result),
-    });
-}
+      return res.status(200).json({
+        project: JSON.parse(result),
+      });
+    }
 
     const projects = await projectModel
       .find({
         owner: userId,
         starred: true,
       })
-      .sort({ updated: -1 });
+      .sort({ updatedAt: -1 });
 
-    await res.set(key,JSON.stringify(projects))
+    await redis.set(key,JSON.stringify(projects))
 
     res.status(200).json({
-      message: "All Starred Project fetched Successfully",
-      projects: projects,
+      project: projects,
     });
   } catch (error) {
     return res.status(500).json({

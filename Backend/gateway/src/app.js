@@ -29,7 +29,12 @@ app.use(
   }),
 );
 
-app.use("/api/project",authMiddleware,proxyWithheader(process.env.PROJECT_SERVICE));
+app.use("/api/project",authMiddleware,proxyWithheader(process.env.PROJECT_SERVICE,{
+    proxyReqPathResolver: (req) => {
+      return `/project${req.url}`;
+    },
+}));
+
 app.get("/api/me", authMiddleware, getCurrentUser);
 
 app.get("/", (req, res) => {

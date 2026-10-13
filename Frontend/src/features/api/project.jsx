@@ -15,7 +15,7 @@ export const createProject = async ({name,description}) => {
 export const getProjects = async () => {
   try {
     const { data } = await axiosInstance.get("/api/project");
-    return data;
+    return data.project;
   } catch (error) {
     console.log(error);
   }
@@ -33,7 +33,7 @@ export const getProjectById = async (id) => {
 export const getStarredProjects = async () => {
   try {
     const { data } = await axiosInstance.get("/api/project/starred");
-    return data;
+    return data.project;
   } catch (error) {
     console.log(error);
   }
