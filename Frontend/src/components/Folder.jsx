@@ -17,7 +17,7 @@ import { getFileIcon, getFolderColor } from "../utils/customizeIcon";
 import { createFile, createFolder, deleteFile, updateFile } from "../features/api/file";
 import { createPortal } from "react-dom";
 
-const Folder = ({ projectId, node, tree, reloadTree }) => {
+const Folder = ({ openFile,projectId, node, tree, reloadTree }) => {
   const [open, setOpen] = useState(false);
   const folderColor = getFolderColor(node?.name);
   const [folderName, setFolderName] = useState("");
@@ -73,6 +73,7 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
 
             setMenu({ x: e.clientX, y: e.clientY });
           }}
+          onClick={()=>openFile(node)}
           className="group flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.05] transition-colors"
         >
           <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5">
@@ -307,6 +308,7 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
                 tree={tree}
                 reloadTree={reloadTree}
                 node={child}
+                openFile={openFile}
               />
             );
           })}

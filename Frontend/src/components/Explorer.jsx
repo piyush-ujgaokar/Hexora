@@ -2,7 +2,7 @@ import { FolderTree, RefreshCcw } from "lucide-react";
 import Folder from "../components/Folder"
 import { motion } from "motion/react";
 
-const Explorer = ({ projectId, tree, reloadTree }) => {
+const Explorer = ({openFile,projectId, tree, reloadTree }) => {
 
 
   return (
@@ -55,7 +55,8 @@ hover:[&::-webkit-scrollbar-thumb]:bg-white/[0.15]
                         projectId={projectId} 
                         node={node}
                         tree={tree} 
-                        reloadTree={reloadTree}  
+                        reloadTree={reloadTree} 
+                        openFile={openFile}
                         />
                     })
             )}
