@@ -139,8 +139,9 @@ export const createFile = async (req, res) => {
       language,
       extension,
       content,
+      owner:userId,
       size: content.length,
-      projectId: parentId || null,
+      projectId,
     });
 
     return res.status(201).json({
@@ -150,7 +151,7 @@ export const createFile = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Error in CreateFile controller ${error}" });
+      .json({ message: `Error in CreateFile controller ${error}` });
   }
 };
 

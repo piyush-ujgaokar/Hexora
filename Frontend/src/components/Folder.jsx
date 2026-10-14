@@ -1,5 +1,6 @@
 import {
   ChevronRight,
+  File,
   FilePlus,
   FilePlus2,
   FolderClosed,
@@ -12,12 +13,11 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { getFolderColor } from "../utils/customizeIcon";
+import { getFileIcon, getFolderColor } from "../utils/customizeIcon";
 import { createFile, createFolder } from "../features/api/file";
 import { createPortal } from "react-dom";
 
 const Folder = ({ projectId, node, tree, reloadTree }) => {
-
   const [open, setOpen] = useState(false);
   const folderColor = getFolderColor(node?.name);
   const [folderName, setFolderName] = useState("");
@@ -44,6 +44,72 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
     setCreatingFileIn(folder._id);
     setCreatingFolderIn(null);
   };
+
+  if (node.type == "file") {
+
+    const {icon:Icon,color}=getFileIcon(node.name)
+
+    return (
+      <div className="relative">
+        <motion.div
+          whileHover={{ x: 2 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+
+            setMenu({ x: e.clientX, y: e.clientY });
+          }}
+          className="group flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.05] transition-colors"
+        >
+          <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5">
+            <Icon size={20} className={`${color}`}/>
+
+            <span className="truncate text-[13px] text-zinc-300 transition-colors group-hover:text-white  ">
+              {node?.name}
+            </span>
+          </div>
+        </motion.div>
+
+        {menu &&
+          createPortal(
+            <>
+              <motion.div
+                className="fixed inset-0 z-40"
+                onClick={() => setMenu(null)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: -6 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -6 }}
+                transition={{ duration: 0.14, ease: "easeOut" }}
+                className="fixed z-50 w-52 rounded-xl border border-white/[0.08] bg-[#17171a]/95 py-1.5 shadow-2xl shadow-black/50 backdrop-blur-xl"
+                style={{ left: menu.x, top: menu.y }}
+              >
+                <button
+                  className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
+                  onClick={() => setMenu(null)}
+                >
+                  <Pencil size={13} />
+                  Rename
+                </button>
+
+                <button
+                  className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
+                  onClick={() => setMenu(null)}
+                >
+                  <Trash size={13} />
+                  Delete
+                </button>
+              </motion.div>
+            </>,
+            document.body,
+          )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
@@ -178,12 +244,14 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
           className="ml-5 overflow-hidden border-l border-white/[0.05] pl-1"
         >
           {node.children.map((child) => {
-            return <Folder
-              projectId={projectId}
-              tree={tree}
-              reloadTree={reloadTree}
-              node={child}
-            />;
+            return (
+              <Folder
+                projectId={projectId}
+                tree={tree}
+                reloadTree={reloadTree}
+                node={child}
+              />
+            );
           })}
         </motion.div>
       )}
@@ -199,7 +267,11 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
             className="w-full rounded-md border border-white/[0.1] bg-white/[0.04] px-2.5 py-1.5 text-[13px] text-white placeholder-zinc-500 outline-none transition-all focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/15"
             onChange={(e) => setFolderName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") handleCreateFolder();
+              if (e.key === "Enter") {
+                handleCreateFolder();
+                setFolderName("");
+                setCreatingFolderIn(null);
+              }
               if (e.key === "Escape") {
                 setFolderName("");
                 setCreatingFolderIn(null);
@@ -208,7 +280,31 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
           />
         </div>
       )}
-    
+
+      {creatingFileIn == node._id && (
+        <div className="py-1 pl-1">
+          <motion.input
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            autoFocus
+            value={fileName}
+            placeholder="File Name"
+            className="w-full rounded-md border border-white/[0.1] bg-white/[0.04] px-2.5 py-1.5 text-[13px] text-white placeholder-zinc-500 outline-none transition-all focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/15"
+            onChange={(e) => setFileName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleCreateFile();
+                setFileName("");
+                setCreatingFileIn(null);
+              }
+              if (e.key === "Escape") {
+                setFileName("");
+                setCreatingFileIn(null);
+              }
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
