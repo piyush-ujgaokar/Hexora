@@ -244,7 +244,7 @@ export const getTree = async (req, res) => {
     const userId = req.headers["x-user-id"];
     const { projectId } = req.params;
     const files = await fileModel
-      .findOne({
+      .find({
         projectId,
         owner: userId,
         isDeleted: false,
@@ -263,12 +263,11 @@ export const getTree = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Get Tree Successfully",
-      tree,
+      tree
     });
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Error in GetTree controller ${error}" });
+      .json({ message: `Error in GetTree controller ${error}` });
   }
 };

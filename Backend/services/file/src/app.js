@@ -9,7 +9,7 @@ app.use(cookieParser())
 app.use(express.json())
 
 
-app.use("/",fileRoutes)
+app.use("/file",fileRoutes)
 
 
 app.get("/",(req,res)=>{

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { me } from "./features/api/me";
 import { useDispatch } from "react-redux";
 import { setUserData } from "./redux/userSlice";
+import ProjectPage from "./pages/ProjectPage";
 
 const AppRoutes = () => {
 
@@ -21,6 +22,10 @@ const AppRoutes = () => {
         {
             path:"/",
             element:<DashBoard />
+        },
+        {
+            path:"/project/:id",
+            element:<ProjectPage/>
         }
     ])
 

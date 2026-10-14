@@ -29,17 +29,9 @@ app.use(
   }),
 );
 
-app.use("/api/project",authMiddleware,proxyWithheader(process.env.PROJECT_SERVICE,{
-    proxyReqPathResolver: (req) => {
-      return `/project${req.url}`;
-    },
-}));
+app.use("/api/project",authMiddleware,proxyWithheader(process.env.PROJECT_SERVICE,"/project"));
 
-app.use("/api/file",proxyWithheader(process.env.FILE_SERVICE,{
-    proxyReqPathResolver: (req) => {
-      return `/file${req.url}`;
-    },
-}));
+app.use("/api/file",authMiddleware,proxyWithheader(process.env.FILE_SERVICE,"/file"));
 
 app.get("/api/me", authMiddleware, getCurrentUser);
 

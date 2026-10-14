@@ -4,11 +4,15 @@ import { createSlice } from "@reduxjs/toolkit";
 const projectSlice=createSlice({
     name:"project",
     initialState:{
-        projects:[]
+        projects:[],
+        currentProject:null
     },
     reducers:{
         setProjects:(state,action)=>{
             state.projects=action.payload
+        },
+        setCurrentProject:(state,action)=>{
+            state.currentProject=action.payload
         },
         addNewProject:(state,action)=>{
             state.projects.unshift(action.payload)
@@ -31,5 +35,5 @@ const projectSlice=createSlice({
     }
 })
 
-export const {setProjects,starProject,addNewProject,setDeleteProject}=projectSlice.actions
+export const {setProjects,starProject,setCurrentProject,addNewProject,setDeleteProject}=projectSlice.actions
 export default projectSlice.reducer
