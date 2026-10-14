@@ -14,7 +14,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { getFileIcon, getFolderColor } from "../utils/customizeIcon";
-import { createFile, createFolder } from "../features/api/file";
+import { createFile, createFolder, deleteFile, updateFile } from "../features/api/file";
 import { createPortal } from "react-dom";
 
 const Folder = ({ projectId, node, tree, reloadTree }) => {
@@ -24,6 +24,8 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
   const [fileName, setFileName] = useState("");
   const [creatingFolderIn, setCreatingFolderIn] = useState(null);
   const [creatingFileIn, setCreatingFileIn] = useState(null);
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
 
   const [menu, setMenu] = useState(null);
 
@@ -33,6 +35,19 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
   };
   const handleCreateFile = async () => {
     await createFile({ projectId, name: fileName, parentId: node._id });
+    await reloadTree();
+  };
+
+  const handleRenameFile = async () => {
+    await updateFile({
+      name: renameValue,
+      id: node?._id,
+      content: node?.content,
+    });
+    await reloadTree();
+  };
+  const handleDeleteFile = async () => {
+    await deleteFile(node?._id);
     await reloadTree();
   };
 
@@ -46,8 +61,7 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
   };
 
   if (node.type == "file") {
-
-    const {icon:Icon,color}=getFileIcon(node.name)
+    const { icon: Icon, color } = getFileIcon(node.name);
 
     return (
       <div className="relative">
@@ -62,7 +76,7 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
           className="group flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.05] transition-colors"
         >
           <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5">
-            <Icon size={20} className={`${color}`}/>
+            <Icon size={20} className={`${color}`} />
 
             <span className="truncate text-[13px] text-zinc-300 transition-colors group-hover:text-white  ">
               {node?.name}
@@ -90,7 +104,10 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
               >
                 <button
                   className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
-                  onClick={() => setMenu(null)}
+                  onClick={() =>{ 
+                    setMenu(null)
+                    setRenaming(true)
+                  }}
                 >
                   <Pencil size={13} />
                   Rename
@@ -98,15 +115,46 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
 
                 <button
                   className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
-                  onClick={() => setMenu(null)}
+                  onClick={() => {
+                    setMenu(null)
+                    handleDeleteFile()
+                  }}
                 >
                   <Trash size={13} />
                   Delete
                 </button>
               </motion.div>
-            </>,
-            document.body,
+            </>,document.body,
           )}
+
+            {renaming && (
+        <div className="py-1 pl-1">
+          <motion.input
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            autoFocus
+            value={renameValue}
+            placeholder={node?.name}
+            className="w-full rounded-md border border-white/[0.1] bg-white/[0.04] px-2.5 py-1.5 text-[13px] text-white placeholder-zinc-500 outline-none transition-all focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/15"
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleRenameFile();
+                setRenameValue("");
+                setRenaming(null);
+              }
+              if (e.key === "Escape") {
+                setRenameValue("");
+                setRenaming(null);
+              }
+            }}
+          />
+        </div>
+      )}
+
+
+
+
       </div>
     );
   }
@@ -217,19 +265,28 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
 
               <button
                 className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
-                onClick={() => setMenu(null)}
+                onClick={() => {
+                    setMenu(null)
+                  setRenaming(true);
+                }}
               >
                 <Pencil size={13} />
                 Rename
               </button>
 
-              <button
-                className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
-                onClick={() => setMenu(null)}
-              >
-                <Trash size={13} />
-                Delete
-              </button>
+              {node.parentId != null && (
+                <button
+                  className="mx-1 flex w-[calc(100%-8px)] items-center gap-2 rounded-md px-3 py-2 text-[13px] text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
+                   onClick={() => {
+                    setMenu(null)
+                    handleDeleteFile()
+                  }}
+                >
+                  <Trash size={13} />
+                  Delete
+                </button>
+              )}
+
             </motion.div>
           </>,
           document.body,
@@ -300,6 +357,31 @@ const Folder = ({ projectId, node, tree, reloadTree }) => {
               if (e.key === "Escape") {
                 setFileName("");
                 setCreatingFileIn(null);
+              }
+            }}
+          />
+        </div>
+      )}
+
+      {renaming && (
+        <div className="py-1 pl-1">
+          <motion.input
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            autoFocus
+            value={renameValue}
+            placeholder={node?.name}
+            className="w-full rounded-md border border-white/[0.1] bg-white/[0.04] px-2.5 py-1.5 text-[13px] text-white placeholder-zinc-500 outline-none transition-all focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/15"
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleRenameFile();
+                setRenameValue("");
+                setRenaming(null);
+              }
+              if (e.key === "Escape") {
+                setRenameValue("");
+                setRenaming(null);
               }
             }}
           />

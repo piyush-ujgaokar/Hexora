@@ -33,7 +33,7 @@ export const createFile = async ({projectId,parentId,name,content="",language="p
   }
 };
 
-export const updateFile = async ({name,content,id}) => {
+export const updateFile = async ({name,content="",id}) => {
   try {
     const { data } = await axiosInstance.post(`/api/file/update/${id}`,{
         name,content
