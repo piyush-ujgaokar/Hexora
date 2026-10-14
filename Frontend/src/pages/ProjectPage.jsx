@@ -23,6 +23,8 @@ const ProjectPage = () => {
     
       const [showTerminal, setShowTerminal] = useState(false);
 
+      const [tree, setTree] = useState([])
+      
 
       const handleGetProject=async()=>{
            const data= await getProjectById(id)
@@ -31,7 +33,8 @@ const ProjectPage = () => {
 
       const loadTree=async()=>{
        const data= await getTree(id)
-       console.log(data);
+       setTree(data?.tree || [])
+       console.log();
        
       }
 
@@ -58,7 +61,7 @@ const ProjectPage = () => {
 
     <AnimatePresence initial={false}>
         {showExplorer && (
-            <Explorer />
+            <Explorer projectId={id} tree={tree} reloadTree={loadTree} />
         )}
     </AnimatePresence>
 

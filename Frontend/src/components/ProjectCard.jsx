@@ -3,7 +3,7 @@ import { deleteProject, toggleStar } from "../features/api/project";
 import { useState } from "react";
 import { Star, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { setCurrentProject, setDeleteProject, starProject } from "../redux/projectSlice";
+import { setDeleteProject, starProject } from "../redux/projectSlice";
 import { useNavigate } from "react-router";
 const ProjectCard = ({ project, activeSession }) => {
   const [loadingStar, setLoadingStar] = useState(false);
@@ -56,9 +56,6 @@ const ProjectCard = ({ project, activeSession }) => {
         duration: 0.18,
         ease: "easeOut",
       }}
-      onClick={()=>{
-        navigate(`/project/${project?._id}`)
-      }}
       className="group relative cursor-pointer rounded-2xl border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:border-white/[0.07] dark:bg-white/[0.03] dark:shadow-none dark:hover:border-white/[0.14] dark:hover:bg-white/[0.045]"
     >
       <motion.div
@@ -74,12 +71,16 @@ const ProjectCard = ({ project, activeSession }) => {
           className={project.starred ? "fill-amber-400 text-amber-400" : ""}
         />
       </motion.div>
-      <h3 className="mb-1.5 truncate pr-6 text-[14px] font-semibold tracking-tight text-zinc-900 dark:text-white">
+      <div onClick={()=>{
+        navigate(`/project/${project?._id}`)
+      }} >
+        <h3 className="mb-1.5 truncate pr-6 text-[14px] font-semibold tracking-tight text-zinc-900 dark:text-white">
         {project.name}
       </h3>
       <p className="line-clamp-2 min-h-[2.5em] text-[12.5px] leading-snug text-zinc-500">
         {project.description || "No Description"}
       </p>
+      </div>
 
       <div className="mt-4 flex items-center justify-end border-t border-black/[0.05] pt-3 dark:border-white/[0.06]">
         {confirmDelete ? (
