@@ -1,25 +1,42 @@
 import { motion } from "motion/react";
 import { getFileIcon } from "../utils/customizeIcon";
 import { AnimatePresence } from "motion/react";
-import MonacoEditor from '@monaco-editor/react';
-import { Check, Loader2, Save, X } from "lucide-react";
+import MonacoEditor from "@monaco-editor/react";
+import { Check, Circle, Loader2, Save, X } from "lucide-react";
 import { getFile, updateFile } from "../features/api/file";
 import { useState } from "react";
 import { useEffect } from "react";
 const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab }) => {
-
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [code, setCode] = useState("");
 
-   useEffect(()=>{
-        setCode(activeTab?.content)
-    },[activeTab])
+  useEffect(() => {
+    setCode(activeTab?.content);
+  }, [activeTab]);
 
-  const handleCloseTab = (id) => {
-    const result = openTabs.filter((tab) => tab._id !== id);
+  const handleCloseTab = (e,id) => {
+    e.stopPropagation()
+    const result = openTabs.filter((tab) => tab?._id !== id);
     setOpenTabs(result);
+    if (activeTab?._id == id) {
+      setActiveTab(result.length ? result[result.length - 1] : null);
+    }
   };
+
+  if (!activeTab) return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 bg-[#0a0a0c] text-zinc-600">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.02]">
+        <Circle size={22} className="text-zinc-700" />
+      </div>
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-sm font-medium text-zinc-400">No File Open</span>
+        <span className="text-xs text-zinc-600">
+          Select a file from Explorer to start editing
+        </span>
+      </div>
+    </div>
+  )
 
   const save = async () => {
     if (!activeTab) return;
@@ -75,8 +92,8 @@ const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab }) => {
                 <Icon size={14} className={`${color}`} />
                 <span className="text-[13px]">{tab?.name}</span>
                 <button
-                  onClick={() => {
-                    handleCloseTab(tab?._id);
+                  onClick={(e) => {
+                    handleCloseTab(e,tab?._id);
                   }}
                   className="rounded p-0.5 text-zinc-500 cursor-pointer opacity-0 hover:bg-white/10 hover:text-white group-hover:opacity-100"
                 >
@@ -117,28 +134,29 @@ const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab }) => {
                 exit={{ opacity: 0 }}
                 className="flex cursor-pointer items-center gap-2"
               >
-                <Loader2 size={13} className="animate-spin" />Saving
+                <Loader2 size={13} className="animate-spin" />
+                Saving
               </motion.span>
             ) : justSaved ? (
-              <motion.span 
+              <motion.span
                 key="saved"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="flex cursor-pointer  items-center gap-2"
               >
-                <Check size={13}/>
+                <Check size={13} />
                 Saved
               </motion.span>
             ) : (
               <motion.span
-                 key="save"
+                key="save"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="flex cursor-pointer  items-center gap-2"
               >
-                <Save size={13}/>
+                <Save size={13} />
                 Save
               </motion.span>
             )}
@@ -146,28 +164,23 @@ const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab }) => {
         </motion.div>
       </div>
 
-
-        <div className="min-h-0 flex-1">
-            <MonacoEditor
-                height="100%"
-                theme="vs-dark"
-                language={activeTab?.language || "plaintext"}
-                value={code}
-                onChange={(value)=> setCode(value || "")}
-                options={{
-                    fonSize:14,
-                    automaticLayout:true,
-                    minimap:{enabled:false},
-                    wordWrap:"on",
-                    scrollBeyondLastLine:false,
-                    padding:{top:12}
-                }}
-            />
-        </div>
-
-
-
-
+      <div className="min-h-0 flex-1">
+        <MonacoEditor
+          height="100%"
+          theme="vs-dark"
+          language={activeTab?.language || "plaintext"}
+          value={code}
+          onChange={(value) => setCode(value || "")}
+          options={{
+            fonSize: 14,
+            automaticLayout: true,
+            minimap: { enabled: false },
+            wordWrap: "on",
+            scrollBeyondLastLine: false,
+            padding: { top: 12 },
+          }}
+        />
+      </div>
     </div>
   );
 };

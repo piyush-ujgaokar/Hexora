@@ -10,9 +10,11 @@ import { setCurrentProject } from "../redux/projectSlice";
 import { useEffect } from "react";
 import { getTree } from "../features/api/file";
 import { motion } from "motion/react";
-import { Code2, Eye, Maximize2, Minimize } from "lucide-react";
+import { Bot, Code2, Eye, Files, Maximize2, Minimize, Sparkles, TerminalSquare } from "lucide-react";
 import Preview from "../components/Preview";
 import Editor from "../components/Editor";
+import BottomPanel from "../components/BottomPanel";
+import AiChat from "../components/AiChat";
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -33,6 +35,8 @@ const ProjectPage = () => {
   const [openTabs, setOpenTabs] = useState([]);
 
   const [activeTab, setActiveTab] = useState(null);
+
+  const [showBottomPanel, setShowBottomPanel] = useState(false);
 
   const [mobilePane, setMobilePane] = useState("explorer");
 
@@ -72,13 +76,12 @@ const ProjectPage = () => {
           <ActivityBar
             showAiChat={showAiChat}
             showExplorer={showExplorer}
-            showTerminal={showTerminal}
+            showTerminal={showBottomPanel}
             setShowExplorer={setShowExplorer}
-            setShowTerminal={setShowTerminal}
+            setShowTerminal={setShowBottomPanel}
             setShowAiChat={setShowAiChat}
           />
         </div>
-
         <div
           className={`${
             mobilePane === "explorer" ? "flex" : "hidden"
@@ -95,7 +98,6 @@ const ProjectPage = () => {
             )}
           </AnimatePresence>
         </div>
-
         <div
           className={`${mobilePane === "editor" ? "flex" : "hidden"} relative w-full min-w-0 flex-1 flex-col overflow-hidden border-x border-white/[0.05] md:flex`}
         >
@@ -162,20 +164,19 @@ const ProjectPage = () => {
               </button>
             </div>
           </div>
-          {openTabs.length > 0 && (
-            <div className="flex min-h-0 flex-1 overflow-hidden">
-              {showPreview ? (
-                <Preview tree={tree} />
-              ) : (
-                <Editor
-                  activeTab={activeTab}
-                  openTabs={openTabs}
-                  setOpenTabs={setOpenTabs}
-                  setActiveTab={setActiveTab}
-                />
-              )}
-            </div>
-          )}
+
+          <div className="flex min-h-0 flex-1 overflow-hidden">
+            {showPreview ? (
+              <Preview tree={tree} />
+            ) : (
+              <Editor
+                activeTab={activeTab}
+                openTabs={openTabs}
+                setOpenTabs={setOpenTabs}
+                setActiveTab={setActiveTab}
+              />
+            )}
+          </div>
 
           <AnimatePresence>
             {showPreview && isPreviewFullScreen && (
@@ -186,27 +187,101 @@ const ProjectPage = () => {
                 transition={{ duration: 0.18, ease: "easeOut" }}
                 className="fixed inset-0 z-[100] bg-white"
               >
-                <Preview tree={tree}/>
+                <Preview tree={tree} />
 
-                  <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                type="button"
-                onClick={() => setIsPreviewFullScreen(false)}
-
-               className="absolute right-2 top-2 z-[110] flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#111113]/95 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 shadow-lg shadow-black/40 backdrop-blur hover:text-white cursor-pointer sm:right-4 sm:top-3 sm:px-3 sm:text-xs"
-              >
-
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  type="button"
+                  onClick={() => setIsPreviewFullScreen(false)}
+                  className="absolute right-2 top-2 z-[110] flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#111113]/95 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 shadow-lg shadow-black/40 backdrop-blur hover:text-white cursor-pointer sm:right-4 sm:top-3 sm:px-3 sm:text-xs"
+                >
                   <Minimize size={13} />
-              </motion.div>
-
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
 
+          <AnimatePresence>
+            {showBottomPanel && (
+              <div className="max-h-[45vh] md:max-h-none  ">
+                <BottomPanel
+                  onClose={() => setShowBottomPanel(false)}
+                  projectId={id}
+                />
+              </div>
+            )}
+          </AnimatePresence>
         </div>
+        <div
+          className={`${mobilePane === "chat" ? "flex" : "hidden"} w-full md:flex md:w-auto`}
+        >
+          <AnimatePresence initial={false}>
+            {showAiChat && <AiChat projectId={id} />}
+          </AnimatePresence>
+        </div>
+        
       </div>
+
+      <div className='flex items-center justify-around border-t border-white/[0.06] bg-[#0f0f12] py-2 md:hidden'>
+  {/* Files / Explorer Tab */}
+  <button
+    onClick={() =>{ 
+        setMobilePane("explorer") 
+        setShowExplorer((v)=>!v)
+    }}
+    className={`flex flex-col cursor-pointer items-center gap-1 px-4 py-1 text-[11px] font-medium transition-colors ${
+      mobilePane === "explorer" ? "text-white" : "text-zinc-500"
+    }`}
+  >
+    <Files size={18} />
+    Files
+  </button>
+
+  {/* Editor Tab */}
+  <button
+    onClick={() => {
+        setMobilePane("editor")
+        
+    }}
+    className={`flex flex-col items-center gap-1 px-4 py-1 text-[11px] font-medium cursor-pointer transition-colors ${
+      mobilePane === "editor" ? "text-white" : "text-zinc-500"
+    }`}
+  >
+    <Code2 size={18} />
+    Editor
+  </button>
+
+  {/* AI Chat Tab */}
+  <button
+    onClick={() => {
+        setMobilePane("chat")
+        setShowAiChat((v)=>!v)
+    }}
+    className={`flex flex-col cursor-pointer items-center gap-1 px-4 py-1 text-[11px] font-medium transition-colors ${
+      mobilePane === "chat" ? "text-white" : "text-zinc-500"
+    }`}
+  >
+    <Bot size={18} />
+    Chat
+  </button>
+
+  {/* Terminal */}
+  <button
+    onClick={() => {
+        setShowBottomPanel((v)=>!v)
+    }}
+    className={`flex flex-col cursor-pointer items-center gap-1 px-4 py-1 text-[11px] font-medium transition-colors ${
+      showTerminal ? "text-white" : "text-zinc-500"
+    }`}
+  >
+    <TerminalSquare size={18} />
+    Terminal
+  </button>
+</div>
+
+
     </div>
   );
 };
