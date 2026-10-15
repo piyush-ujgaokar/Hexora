@@ -162,8 +162,7 @@ const ProjectPage = () => {
               </button>
             </div>
           </div>
-
-          {openTabs.length>0 && (
+          {openTabs.length > 0 && (
             <div className="flex min-h-0 flex-1 overflow-hidden">
               {showPreview ? (
                 <Preview tree={tree} />
@@ -177,6 +176,35 @@ const ProjectPage = () => {
               )}
             </div>
           )}
+
+          <AnimatePresence>
+            {showPreview && isPreviewFullScreen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="fixed inset-0 z-[100] bg-white"
+              >
+                <Preview tree={tree}/>
+
+                  <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                type="button"
+                onClick={() => setIsPreviewFullScreen(false)}
+
+               className="absolute right-2 top-2 z-[110] flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#111113]/95 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 shadow-lg shadow-black/40 backdrop-blur hover:text-white cursor-pointer sm:right-4 sm:top-3 sm:px-3 sm:text-xs"
+              >
+
+                  <Minimize size={13} />
+              </motion.div>
+
+              </motion.div>
+            )}
+          </AnimatePresence>
+
         </div>
       </div>
     </div>
