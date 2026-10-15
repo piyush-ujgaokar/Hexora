@@ -34,7 +34,8 @@ const Folder = ({ openFile,projectId, node, tree, reloadTree }) => {
     await reloadTree();
   };
   const handleCreateFile = async () => {
-    await createFile({ projectId, name: fileName, parentId: node._id });
+    const lang=fileName.split(".").pop()
+    await createFile({ projectId, language:lang, name: fileName, parentId: node._id });
     await reloadTree();
   };
 
