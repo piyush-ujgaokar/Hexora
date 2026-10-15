@@ -33,7 +33,7 @@ const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab }) => {
 
       setActiveTab({ ...activeTab, content: code });
       setOpenTabs((tabs) =>
-        tabs.mao((tab) =>
+        tabs.map((tab) =>
           tab._id == activeTab._id ? { ...tab, content: code } : tab,
         ),
       );
@@ -97,7 +97,7 @@ const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab }) => {
 
       <div className="flex h-10 shrink-0 items-center  border-b border-white/[0.06] px-4 gap-4 ">
         <div className="flex items-center gap-2 text-zinc-400">
-          <ActiveIcon size={14} clasName={`${activeColor}`} />
+          <ActiveIcon size={14} className={`${activeColor}`} />
           <span className="text-[13px]">{activeTab?.name}</span>
         </div>
 

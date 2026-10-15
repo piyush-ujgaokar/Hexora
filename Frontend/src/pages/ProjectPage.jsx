@@ -30,9 +30,9 @@ const ProjectPage = () => {
 
   const [tree, setTree] = useState([]);
 
-  const [openTabs, setOpenTabs] = useState([])
+  const [openTabs, setOpenTabs] = useState([]);
 
-  const [activeTab, setActiveTab] = useState(null)
+  const [activeTab, setActiveTab] = useState(null);
 
   const [mobilePane, setMobilePane] = useState("explorer");
 
@@ -52,12 +52,12 @@ const ProjectPage = () => {
     loadTree();
   }, [id]);
 
-  const openFile=(file)=>{
-    const exists=openTabs.find(tab=>tab._id==file._id)
-    if(!exists) setOpenTabs(prev=>[...prev,file])
-    setActiveTab(file)
-setShowPreview(false)
-  }
+  const openFile = (file) => {
+    const exists = openTabs.find((tab) => tab._id == file._id);
+    if (!exists) setOpenTabs((prev) => [...prev, file]);
+    setActiveTab(file);
+    setShowPreview(false);
+  };
 
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-[#0a0a0c]">
@@ -86,7 +86,12 @@ setShowPreview(false)
         >
           <AnimatePresence initial={false}>
             {showExplorer && (
-              <Explorer openFile={openFile} projectId={id} tree={tree} reloadTree={loadTree} />
+              <Explorer
+                openFile={openFile}
+                projectId={id}
+                tree={tree}
+                reloadTree={loadTree}
+              />
             )}
           </AnimatePresence>
         </div>
@@ -94,7 +99,6 @@ setShowPreview(false)
         <div
           className={`${mobilePane === "editor" ? "flex" : "hidden"} relative w-full min-w-0 flex-1 flex-col overflow-hidden border-x border-white/[0.05] md:flex`}
         >
-
           <div className="pointer-events-none absolute right-2 top-2 z-40 flex items-center gap-1.5 sm:right-4 sm:top-3 sm:gap-2">
             {showPreview && (
               <motion.div
@@ -135,8 +139,8 @@ setShowPreview(false)
                     transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
                   />
                 )}
-                <Code2 size={13} className="relative"/>
-               <span className="relative hidden sm:inline"> Editor</span> 
+                <Code2 size={13} className="relative" />
+                <span className="relative hidden sm:inline"> Editor</span>
               </button>
 
               <button
@@ -147,30 +151,32 @@ setShowPreview(false)
                     : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
-                 {showPreview && (
+                {showPreview && (
                   <motion.div
                     className="absolute inset-0 rounded-md bg-gradient-to-b from-zinc-700 to-zinc-800"
                     transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
                   />
                 )}
-                <Eye size={13} className="relative"/>
-                 <span className="relative hidden sm:inline"> Preview</span> 
-
+                <Eye size={13} className="relative" />
+                <span className="relative hidden sm:inline"> Preview</span>
               </button>
             </div>
           </div>
 
+          {openTabs.length>0 && (
             <div className="flex min-h-0 flex-1 overflow-hidden">
-                {
-                    showPreview ? <Preview tree={tree}/>:<Editor 
-                        activeTab={activeTab}
-                        openTabs={openTabs}
-                        setOpenTabs={setOpenTabs}
-                        setActiveTab={setActiveTab}
-                    />
-                }
+              {showPreview ? (
+                <Preview tree={tree} />
+              ) : (
+                <Editor
+                  activeTab={activeTab}
+                  openTabs={openTabs}
+                  setOpenTabs={setOpenTabs}
+                  setActiveTab={setActiveTab}
+                />
+              )}
             </div>
-
+          )}
         </div>
       </div>
     </div>
