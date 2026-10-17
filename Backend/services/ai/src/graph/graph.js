@@ -1,11 +1,14 @@
-import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages"
-import { fileTools } from "./tools.js"
-import openRouterllm from "../utils/llm.js"
-import { MessagesAnnotation, StateGraph } from "@langchain/langgraph"
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
+import { fileTools } from "./tools.js";
+import openRouterllm from "../utils/llm.js";
+import { MessagesAnnotation, StateGraph } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
-
-const system_prompt=`
+const system_prompt = `
 You are an expert coding agent inside a Cursor-like IDE.
 
 Your job is to ACTUALLY create and modify the user's project using filesystem tools.
@@ -471,75 +474,63 @@ Do not make unnecessary tool calls.
 Return only:
 
 "Project completed."
-`
+`;
 
-const max_message=12
+const max_message = 12;
 
-const getRecentMessages=(messages:[])=>{
-    if(messages.length<=max_message){
-        return messages
+const getRecentMessages = (messages = []) => {
+  if (messages.length <= max_message) {
+    return messages;
+  }
+
+  const firstUserMessage = () => {
+    messages.find((message) => HumanMessage.isInstance(message));
+  };
+
+  const recents = messages.slice(-max_message);
+
+  if (firstUserMessage && !recents.includes(firstUserMessage)) {
+    return [firstUserMessage, ...recents];
+  }
+
+  return recents;
+};
+
+export const graph = async ({ projectId, userId }) => {
+  const tools = fileTools({ projectId, userId });
+
+  const model = openRouterllm.bindTools(tools);
+
+  const agent = async (state) => {
+    const allMessages = state.messages || [];
+    const recentMessages = getRecentMessages(allMessages);
+
+    const messages = [new SystemMessage(system_prompt), ...recentMessages];
+
+    const response = await model.invoke(messages);
+    console.log(response);
+
+    return {
+      messages: [response],
+    };
+  };
+
+  const toolNode = new ToolNode(tools);
+
+  const shouldContinue = (state) => {
+    const lastMessage = state.messages?.[state.messages.length - 1];
+    if (lastMessage instanceof AIMessage && lastMessage.tool_calls?.length) {
+      return "tools";
+    } else {
+      return "__end__";
     }
+  };
 
-    const firstUserMessage=()=>{
-        messages.find((message)=>HumanMessage.isInstance(message))
-    }
-
-    const recents=messages.slice(-max_message)
-
-    if(firstUserMessage && !recents.includes(firstUserMessage)){
-        return [firstUserMessage,...recents]
-    }
-
-    return recents
-}
-
-
-
-export const graph=async({projectId,userId})=>{
-    const tools=fileTools({projectId,userId})
-
-    const model=openRouterllm.bindTools(tools)
-
-    const agent=async(state)=>{
-        const allMessages=state.messages || []
-        const recentMessages=getRecentMessages(allMessages)
-
-        const messages=[
-            new SystemMessage(system_prompt),
-            ...recentMessages
-        ]
-
-        const response=await model.invoke(messages)
-        console.log(response);
-
-        return {
-            messages:[
-                response
-            ]
-        }
-
-
-    }
-
-    const toolNode=new ToolNode(tools)
-
-    const shouldContinue=(state)=>{
-        const lastMessage=state.messages?.[state.messages.length-1]
-        if(lastMessage instanceof AIMessage && lastMessage.tool_calls?.length){
-            return  "tools"
-        }else{
-            return "__end__"
-        }
-    }
-
-    return new StateGraph(MessagesAnnotation)
-                .addNode("agent",agent)
-                .addNode("tools",toolNode)
-                .addEdge("__start__","agent")
-                .addEdge("tools","agent")
-                .addConditionalEdges("agent",shouldContinue)
-                .compile()
-
-
-}
-
+  return new StateGraph(MessagesAnnotation)
+    .addNode("agent", agent)
+    .addNode("tools", toolNode)
+    .addEdge("__start__", "agent")
+    .addEdge("tools", "agent")
+    .addConditionalEdges("agent", shouldContinue)
+    .compile();
+};

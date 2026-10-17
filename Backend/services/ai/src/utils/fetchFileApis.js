@@ -1,5 +1,9 @@
 import dotenv from "dotenv"
 dotenv.config()
+import axios from "axios"
+
+
+
 const File_url=process.env.FILE_SERVICE_URL
 
 export const createFolder=async({projectId,parentId,name,userId})=>{
@@ -27,7 +31,7 @@ export const createFile=async({projectId,name,parentId,content = "",language = "
 
     try {
 
-       const data= await axios.post(`${File_url}/file/create-file`,{
+       const response= await axios.post(`${File_url}/file/create-file`,{
             projectId,parentId,name,content,language
         },{
             headers:{
@@ -35,7 +39,7 @@ export const createFile=async({projectId,name,parentId,content = "",language = "
             }
         })
 
-        return data
+        return response.data
 
 
     } catch (error) {
@@ -88,14 +92,17 @@ export const getTree=async({userId, projectId})=>{
 
     try {
 
-       const data= await axios.get(`${File_url}/file/tree/${projectId}`,
+       const response= await axios.get(`${File_url}/file/tree/${projectId}`,
         {headers:{
                 "x-user-id":String(userId)
             }
         }
         )
 
-        return data
+         console.log("Tree API response:", response.data);
+
+
+        return response.data
     } catch (error) {
         throw new Error(error)
         

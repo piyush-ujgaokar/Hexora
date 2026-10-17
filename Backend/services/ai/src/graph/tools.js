@@ -19,7 +19,11 @@ export const fileTools = ({ projectId, userId }) => {
     async () => {
       console.log("Ai tool:- getTree()");
       const result = await getTree({ projectId, userId });
-      const tree = compactTree(result);
+      const items=result.tree
+        if (!Array.isArray(items)) {
+      throw new Error("Invalid tree response: expected an array");
+    }
+      const tree = compactTree(items);
       return JSON.stringify({
         success: true,
         tree,
@@ -83,7 +87,7 @@ export const fileTools = ({ projectId, userId }) => {
         file: {
           _id: file._id,
           name: file.name,
-          content: file.name || "",
+          content: file.content || "",
           language: file.language,
           extension: file.extension,
           parentId: file.parentId,
@@ -155,7 +159,7 @@ export const fileTools = ({ projectId, userId }) => {
   const createFileTool = tool(
     async ({ name, parentId, content, language }) => {
       console.log("Ai tool:- createFileTool()");
-      const file = await createFile({ projectId, parentId, userId, name, content,language:language || "paintext"});
+      const file = await createFile({ projectId, parentId, userId, name, content,language:language || "plaintext"});
 
       return JSON.stringify({
         success: true,
@@ -193,7 +197,7 @@ export const fileTools = ({ projectId, userId }) => {
             `,
       schema: z.object({
         name: z.string(),
-        parentId:z.string(),
+        parentId:z.string().nullable(),
         content:z.string(),
         language:z.string().optional()
       }),

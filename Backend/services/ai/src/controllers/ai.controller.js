@@ -11,18 +11,21 @@ const buildHistory = (history) => {
     .filter(
       (recent) =>
         recent?.content &&
-        (recent.role == "user" || recent.role == "assistent"),
+        (recent.role == "user" || recent.role == "assistant"),
     )
     .map((msg) => {
       if (msg.role == "user") {
-        new HumanMessage(msg.content);
+       return new HumanMessage(msg.content);
       }
       return new AIMessage(msg.content);
     });
 };
 
+
+
+
 const sendEvent = (res, type, data) => {
-  if (res.writableEnded || res.distroyed) {
+  if (res.writableEnded || res.destroyed) {
     return false;
   }
 
@@ -53,13 +56,13 @@ export const chat = async (req, res) => {
       });
     }
 
-    res.setHeaders("Content-Type", "text/event-stream; cherset=utf-8");
+    res.setHeader("Content-Type", "text/event-stream; cherset=utf-8");
 
-    res.setHeaders("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
 
-    res.setHeaders("Connection", "keep-alive");
+    res.setHeader("Connection", "keep-alive");
 
-    res.setHeaders("X-Accel-Buffering", "no");
+    res.setHeader("X-Accel-Buffering", "no");
 
     res.flushHeaders?.();
 
@@ -77,7 +80,7 @@ export const chat = async (req, res) => {
 
     const messages = buildHistory(history);
 
-    messages.push(new HumanMessage(message).trim());
+    messages.push(new HumanMessage(message.trim()));
 
     const stream = await graphData.stream(
         {
@@ -91,7 +94,7 @@ export const chat = async (req, res) => {
 
     let finalMessage=""
 
-    for await(const chunk of object){
+    for await(const chunk of stream){
 
         if(disconnected || res.writableEnded) break
 
@@ -115,7 +118,7 @@ export const chat = async (req, res) => {
 
             let content=""
 
-            if(typeOf(last.content == "string")){
+            if(typeof last.content == "string"){
                 content=last.content
             }else if(Array.isArray(last.content)){
                 content=last.content    
@@ -124,7 +127,7 @@ export const chat = async (req, res) => {
             }
 
             if(content){
-                finalMessage(content)
+                finalMessage+=content
                 sendEvent(res,"message",{content})
             }
 
@@ -136,17 +139,17 @@ export const chat = async (req, res) => {
             for(const toolMessage of toolMessages){
                 let result=null
                 try {
-                    result=typeOf toolMessage=="string" ? JSON.parse(toolMessage.content):toolMessage.content
+                    result=typeof toolMessage=="string" ? JSON.parse(toolMessage.content):toolMessage.content
                 } catch (error) {
                     result=null
                 }
 
                 if(result?.operation){
-                    sendEvent(res,res.operation,result)
+                    sendEvent(res,result.operation,result)
                     continue;
                 }
 
-                sendEvent(res,"tool_result",typeOf toolMessage=="string" ? toolMessage.content:JSON.stringify(toolMessage.content))
+                sendEvent(res,"tool_result",typeof toolMessage=="string" ? toolMessage.content:JSON.stringify(toolMessage.content))
 
 
             }
