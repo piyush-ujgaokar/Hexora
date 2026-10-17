@@ -32,8 +32,11 @@ app.use(
 app.use("/api/project",authMiddleware,proxyWithheader(process.env.PROJECT_SERVICE,"/project"));
 
 app.use("/api/file",authMiddleware,proxyWithheader(process.env.FILE_SERVICE,"/file"));
+app.use("/api/ai",authMiddleware,proxyWithheader(process.env.AI_SERVICE,"/ai"));
 
 app.get("/api/me", authMiddleware, getCurrentUser);
+
+
 
 app.get("/", (req, res) => {
   return res.status(200).json({

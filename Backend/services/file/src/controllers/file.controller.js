@@ -89,7 +89,7 @@ export const createFolder = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Error in CreateFolder controller ${error}" });
+      .json({ message: `Error in CreateFolder controller ${error}` });
   }
 };
 
@@ -191,7 +191,7 @@ export const updateFile = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Error in updateFile controller ${error}" });
+      .json({ message: `Error in updateFile controller ${error}` });
   }
 };
 
@@ -210,7 +210,7 @@ export const deleteFile = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Error in deleteFile controller ${error}" });
+      .json({ message: `Error in deleteFile controller ${error}` });
   }
 };
 
@@ -237,7 +237,7 @@ export const getFile = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Error in GetFile controller ${error}" });
+      .json({ message: `Error in GetFile controller ${error}` });
   }
 };
 export const getTree = async (req, res) => {
