@@ -1,11 +1,14 @@
 import {
+  Bot,
   FileMinus,
   FilePen,
   FilePlus2,
   FolderPlus,
+  Loader2,
   Send,
   Sparkles,
   TerminalSquare,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -52,32 +55,37 @@ const ToolBadge = ({ toolType, detail }) => {
   );
 };
 
-const AiChat = ({ projectId, history = [] }) => {
+const AiChat = ({ projectId, history = [], reloadTree }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   console.log("messages are:-", messages);
 
   const onEvent = async (toolType, data) => {
     if (toolType == "file_created") {
+      reloadTree();
       setMessages((prev) => [
         ...prev,
         { role: "tool", toolType: "file_created", detail: data.file.name },
       ]);
     }
     if (toolType == "file_updated") {
+      reloadTree();
       setMessages((prev) => [
         ...prev,
         { role: "tool", toolType: "file_updated", detail: data.file?.name },
       ]);
     }
     if (toolType == "file_deleted") {
+      reloadTree();
       setMessages((prev) => [
         ...prev,
         { role: "tool", toolType: "file_deleted", detail: data.file?.name },
       ]);
     }
     if (toolType == "folder_created") {
+      reloadTree();
       setMessages((prev) => [
         ...prev,
         { role: "tool", toolType: "folder_created", detail: data.folder?.name },
@@ -85,6 +93,7 @@ const AiChat = ({ projectId, history = [] }) => {
     }
 
     if (toolType == "message") {
+      reloadTree();
       const content = data.content;
       if (!content) return;
       setMessages((prev) => {
@@ -105,7 +114,12 @@ const AiChat = ({ projectId, history = [] }) => {
   };
 
   const handleChat = async () => {
+    setLoading(true);
     try {
+      setMessages((prev) => [...prev, { role: "user", content: { message } }]);
+      let msg = message;
+      setMessage("");
+      history = messages;
       const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/api/ai/chat`,
         {
@@ -117,7 +131,7 @@ const AiChat = ({ projectId, history = [] }) => {
           credentials: "include",
           body: JSON.stringify({
             projectId,
-            message,
+            message:msg,
             history,
           }),
         },
@@ -191,6 +205,9 @@ const AiChat = ({ projectId, history = [] }) => {
       console.log(error);
       return null;
     }
+    finally{
+      setLoading(false)
+    }
   };
 
   return (
@@ -218,23 +235,63 @@ const AiChat = ({ projectId, history = [] }) => {
         )}
 
         <AnimatePresence initial={false}>
-          {messages.map((msg,i)=>{
-                if(msg.role=="tool"){
-                  return (
-                    <ToolBadge 
-                    key={i} 
-                    toolType={msg.toolType} 
-                    detail={msg.detail}/>
+          {messages.map((msg, i) => {
+            if (msg.role == "tool") {
+              return (
+                <ToolBadge
+                  key={i}
+                  toolType={msg.toolType}
+                  detail={msg.detail}
+                />
+              );
+            }
 
-                    )
-                }
+            const isUser = msg.role == "user";
 
-                return (
-                  <></>
-                )
-            })
-          }
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.15 }}
+                className={`flex items-start gap-2 ${isUser ? "flex-row-reverse" : ""}`}
+              >
+                <div
+                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                    isUser
+                      ? "bg-white/10 text-zinc-300"
+                      : "bg-gradient-to-br from-sky-400 to-violet-400 text-white"
+                  }`}
+                >
+                  {isUser ? <User size={13} /> : <Bot size={13} />}
+                </div>
+
+                <div
+                  className={`max-w-[85%] rounded-xl px-3 py-2 text-[13px] ${
+                    isUser
+                      ? "bg-gradient-to-b from-sky-500 to-sky-600 text-white"
+                      : msg.error
+                        ? "border border-red-500/20 bg-red-500/10 text-red-300"
+                        : "border border-white/[0.06] bg-white/[0.03] text-zinc-300"
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap leading-relaxed">
+                    {typeof msg.content === "string"
+                      ? msg.content
+                      : (msg.content?.message ?? "")}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
+
+        {loading && (
+          <div className="flex items-center gap-2 pl-8 text-xs text-zinc-500">
+            <Loader2 size={13} className="animate-spin" />
+            <span>AI Is Working...</span>
+          </div>
+        )}
       </div>
 
       <div className="border-t border-white/[0.06] p-3">
@@ -250,9 +307,14 @@ const AiChat = ({ projectId, history = [] }) => {
             onClick={handleChat}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            disabled={loading}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-b from-sky-500 to-pink-600 text-white shadow-[0_1px_0_rgba(255,255,0.2)_inset] transition-opacity hover:from-sky-400 hover:to-red-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <Send size={14} />
+            {loading ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <Send size={14} />
+            )}
           </motion.button>
         </div>
       </div>
