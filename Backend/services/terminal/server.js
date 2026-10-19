@@ -27,7 +27,7 @@ const io = new Server(server, {
 const sessions = new Map();
 
 const send = (socket, data) => {
-  if (!socket.connect) {
+  if (!socket.connected) {
     return;
   }
 
@@ -70,7 +70,7 @@ const normalizeRows = (rows) => {
 };
 
 const getTree = async (projectId, userId) => {
-  const url = `${fileServiceUrl}//tree/${projectId}`;
+  const url = `${fileServiceUrl}/file/tree/${projectId}`;
 
   const response = await fetch(url, {
     headers: {
@@ -78,7 +78,7 @@ const getTree = async (projectId, userId) => {
     },
   });
 
-  const text = response.text;
+  const text = await response.text();
   let data = {};
 
   try {
@@ -93,6 +93,9 @@ const getTree = async (projectId, userId) => {
     );
   }
 
+  console.log("PROJECT TREE:- ",JSON.stringify(data.tree,null,2));
+  
+
   return Array.isArray(data.tree) ? data.tree : [];
 };
 
@@ -105,7 +108,7 @@ const writeNodes = async (nodes, directory) => {
 
     if (node.type == "folder") {
       await fs.mkdir(target, { recursive: true });
-      writeNodes(node.children || [], target);
+      await writeNodes(node.children || [], target);
       continue;
     }
 
