@@ -38,6 +38,8 @@ const ProjectPage = () => {
 
   const [showBottomPanel, setShowBottomPanel] = useState(false);
 
+  const [terminalSyncVersion, setTerminalSyncVersion] = useState(0);
+
   const [mobilePane, setMobilePane] = useState("explorer");
 
   const handleGetProject = async () => {
@@ -174,6 +176,7 @@ const ProjectPage = () => {
                 openTabs={openTabs}
                 setOpenTabs={setOpenTabs}
                 setActiveTab={setActiveTab}
+                onFileSaved={() => setTerminalSyncVersion((version) => version + 1)}
               />
             )}
           </div>
@@ -209,6 +212,7 @@ const ProjectPage = () => {
                 <BottomPanel
                   onClose={() => setShowBottomPanel(false)}
                   projectId={id}
+                  terminalSyncVersion={terminalSyncVersion}
                 />
               </div>
             )}
@@ -218,7 +222,13 @@ const ProjectPage = () => {
           className={`${mobilePane === "chat" ? "flex" : "hidden"} w-full md:flex md:w-auto`}
         >
           <AnimatePresence initial={false}>
-            {showAiChat && <AiChat projectId={id}  reloadTree={loadTree} />}
+            {showAiChat && (
+              <AiChat
+                projectId={id}
+                reloadTree={loadTree}
+                onFilesChanged={() => setTerminalSyncVersion((version) => version + 1)}
+              />
+            )}
           </AnimatePresence>
         </div>
         

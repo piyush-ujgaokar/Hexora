@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import Terminal from "./Terminal";
 import { useSelector } from "react-redux";
 
-const BottomPanel = ({ onClose, projectId }) => {
+const BottomPanel = ({ onClose, projectId, terminalSyncVersion }) => {
 
   const {currentProject}=useSelector(state=>state.project)
   const project=currentProject?.project
@@ -35,7 +35,11 @@ const BottomPanel = ({ onClose, projectId }) => {
       </div>
 
     <div className="min-h-0 flex-1">
-      <Terminal projectId={projectId} userId={userId}/>
+      <Terminal
+        projectId={projectId}
+        userId={userId}
+        syncVersion={terminalSyncVersion}
+      />
     </div>
 
 

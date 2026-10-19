@@ -55,7 +55,7 @@ const ToolBadge = ({ toolType, detail }) => {
   );
 };
 
-const AiChat = ({ projectId, history = [], reloadTree }) => {
+const AiChat = ({ projectId, history = [], reloadTree, onFilesChanged }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -114,6 +114,7 @@ const AiChat = ({ projectId, history = [], reloadTree }) => {
   };
 
   const handleChat = async () => {
+    let projectFilesChanged = false;
     setLoading(true);
     try {
       setMessages((prev) => [...prev, { role: "user", content: { message } }]);
@@ -192,6 +193,15 @@ const AiChat = ({ projectId, history = [], reloadTree }) => {
               };
             }
 
+            if (
+              eventType === "file_created" ||
+              eventType === "file_updated" ||
+              eventType === "file_deleted" ||
+              eventType === "folder_created"
+            ) {
+              projectFilesChanged = true;
+            }
+
             onEvent(eventType, data);
 
             console.log("data:", data);
@@ -207,6 +217,7 @@ const AiChat = ({ projectId, history = [], reloadTree }) => {
     }
     finally{
       setLoading(false)
+      if (projectFilesChanged) onFilesChanged?.();
     }
   };
 

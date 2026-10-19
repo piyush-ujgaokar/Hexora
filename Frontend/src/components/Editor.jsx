@@ -6,7 +6,7 @@ import { Check, Circle, Loader2, Save, X } from "lucide-react";
 import { getFile, updateFile } from "../features/api/file";
 import { useState } from "react";
 import { useEffect } from "react";
-const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab }) => {
+const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab, onFileSaved }) => {
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [code, setCode] = useState("");
@@ -54,6 +54,7 @@ const Editor = ({ activeTab, openTabs, setOpenTabs, setActiveTab }) => {
           tab._id == activeTab._id ? { ...tab, content: code } : tab,
         ),
       );
+      onFileSaved?.();
       setSaving(false);
       setJustSaved(true);
       setTimeout(() => {

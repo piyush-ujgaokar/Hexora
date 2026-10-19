@@ -7,10 +7,11 @@ import { io } from "socket.io-client";
 import { useState } from "react";
 import { Eraser } from "lucide-react";
 
-const Terminal = ({ projectId, userId }) => {
+const Terminal = ({ projectId, userId, syncVersion }) => {
   const containerRef = useRef(null);
   const [connected, setConnected] = useState(false);
   const terminalRef = useRef(null);
+  const socketRef = useRef(null);
 
   useEffect(() => {
     if (!projectId || !userId) return;
@@ -58,6 +59,7 @@ const Terminal = ({ projectId, userId }) => {
     const socket = io(terminalUrl, {
       withCredentials: true,
     });
+    socketRef.current = socket;
 
     const dataSubscription = terminal.onData((data) => {
       socket.emit("terminal:write", data);
@@ -97,6 +99,14 @@ const Terminal = ({ projectId, userId }) => {
       setConnected(false);
     });
 
+    const handleSyncError = ({ message }) => {
+      console.error("Terminal project sync failed", message);
+      terminal.write(
+        `\r\n\x1b[31mProject sync failed: ${message}\x1b[0m\r\n`,
+      );
+    };
+    socket.on("terminal:sync:error", handleSyncError);
+
     const resizeObserver = new ResizeObserver(() => {
       fitTerminal();
       socket.emit("terminal:resize", {
@@ -109,10 +119,18 @@ const Terminal = ({ projectId, userId }) => {
     return () => {
       resizeObserver.disconnect();
       dataSubscription.dispose();
+      socket.off("terminal:sync:error", handleSyncError);
       socket.disconnect();
+      socketRef.current = null;
       terminal.dispose();
     };
   }, [projectId, userId]);
+
+  useEffect(() => {
+    if (syncVersion > 0 && socketRef.current?.connected) {
+      socketRef.current.emit("terminal:sync");
+    }
+  }, [syncVersion]);
 
   const clearTerminal = () => {
     const terminal = terminalRef.current;

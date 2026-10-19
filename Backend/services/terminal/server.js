@@ -209,6 +209,18 @@ io.on("connection", (socket) => {
     session.ptyProcess.write(String(data));
   });
 
+  socket.on("terminal:sync", async () => {
+    const session = sessions.get(socket.id);
+    if (!session) return;
+
+    try {
+      await syncProject(session.projectId, session.userId);
+    } catch (error) {
+      console.error("Terminal project sync error", error);
+      socket.emit("terminal:sync:error", { message: error.message });
+    }
+  });
+
   socket.on("terminal:resize", ({ cols, rows }) => {
     const session = sessions.get(socket.id);
     if (!session) return;
