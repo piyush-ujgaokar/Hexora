@@ -1,6 +1,7 @@
 import { razorpay } from "../config/razorpay.js";
 import paymentModel from "../models/payment.model.js";
 import crypto from "crypto";
+import { addCredits } from "../utils/updateCredits.js";
 
 const Plan = {
   pro: {
@@ -119,10 +120,15 @@ export const verifyPaymentController = async (req, res) => {
 
     payment.status="paid"
     payment.razorpayPaymentId=razorpay_payment_id
-    
+    await payment.save()
 
 
+    const data=await addCredits({userId,credits:payment.credits})
 
+
+     return res.status(201).json({
+      message: "Payment Verified Successfully",
+    });
 
 
   } catch (error) {
