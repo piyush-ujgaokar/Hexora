@@ -23,11 +23,14 @@ export const loginController=async(req,res)=>{
 
         const sessionId=crypto.randomUUID()
 
+        await redis.set(`user-session-${user._id}`,sessionId,"EX", 7*24*60*60)
+
         await redis.set(`session-${sessionId}`,JSON.stringify({
             name:user.name,
             _id:user._id,
             email:user.email,
-            avatar:user.avatar
+            avatar:user.avatar,
+            credits:user.credits
         }),"EX",7*24*60*60)
 
 
@@ -69,5 +72,93 @@ export const logoutController=async(req,res)=>{
     } catch (error) {
         console.log(`error in LogOut Controller:-- ${error}`);
         
+    }
+}
+
+export const deductCreditsController=async(req,res)=>{
+    try {
+        const {userId,amount}=req.body
+        if(!userId){
+            return res.status(404).json({
+                message:"UserId not Found"
+            })
+        }
+
+       const user=await userModel.findOneAndUpdate({_id:userId,credits:{$gte:amount}},{
+            $inc:{
+                credits:-amount
+            }
+        },{
+            returnDocument:"after"
+        }).select("credits")
+
+        if(!user){
+            return res.status(400).json({
+                message:"insufficent-Credits"
+            })
+        }
+
+        const sessionId=await redis.get(`user-session-${userId}`)
+
+        await redis.set(`session-${sessionId}`,JSON.stringify({
+            name:user.name,
+            _id:user._id,
+            email:user.email,
+            avatar:user.avatar,
+            credits:user.credits
+        }),"EX",7*24*60*60)
+
+        return res.status(200).json({
+            credits:user.credits
+        })
+
+
+
+    } catch (error) {
+        return res.status(500).json({
+            message:`DeductCredits controller error:- ${error}`
+        })
+    }
+}
+
+
+export const addCreditsController=async(req,res)=>{
+    try {
+        const {userId,credits}=req.body
+        if(!userId){
+            return res.status(404).json({
+                message:"UserId not Found"
+            })
+        }
+
+      const user=await userModel.findById(userId)
+
+        if(!user){
+            return res.status(404).json({
+                message:"User Not Found"
+            })
+        }
+
+        user.credits=(user.credits||0)+credits
+        user.save()
+
+        const sessionId=await redis.get(`user-session-${userId}`)
+
+        await redis.set(`session-${sessionId}`,JSON.stringify({
+            name:user.name,
+            _id:user._id,
+            email:user.email,
+            avatar:user.avatar,
+            credits:user.credits
+        }),"EX",7*24*60*60)
+
+        return res.status(200).json(user.credits)
+
+
+
+    } catch (error) {
+        return res.status(500).json({
+            message:`addCredits controller error:- ${error}`
+        })
     }
 }
