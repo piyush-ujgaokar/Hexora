@@ -33,6 +33,8 @@ app.use("/api/project",authMiddleware,proxyWithheader(process.env.PROJECT_SERVIC
 
 app.use("/api/file",authMiddleware,proxyWithheader(process.env.FILE_SERVICE,"/file"));
 app.use("/api/ai",authMiddleware,proxyWithheader(process.env.AI_SERVICE,"/ai"));
+app.use("/api/payment",authMiddleware,proxyWithheader(process.env.PAYMENT_SERVICE,"/payment"));
+
 
 app.get("/api/me", authMiddleware, getCurrentUser);
 
