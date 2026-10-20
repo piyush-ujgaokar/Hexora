@@ -82,7 +82,9 @@ const ProjectCard = ({ project, activeSession }) => {
       </p>
       </div>
 
-      <div className="mt-4 flex items-center justify-end border-t border-black/[0.05] pt-3 dark:border-white/[0.06]">
+      <div onClick={(e)=>{
+        e.stopPropagation()
+      }} className="mt-4 flex items-center justify-end border-t border-black/[0.05] pt-3 dark:border-white/[0.06]">
         {confirmDelete ? (
           <motion.div
             initial={{
@@ -98,14 +100,14 @@ const ProjectCard = ({ project, activeSession }) => {
           >
             <button
               onClick={() => setConfirmDelete(false)}
-              className="rounded-md px-2 py-1 text-[11px] text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+              className="rounded-md cursor-pointer px-2 py-1 text-[11px] text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
             >
               Cancel
             </button>
             <button
             disabled={loadingDelete}
               onClick={handleDelete}
-              className="rounded-md bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-500 hover:bg-red-500/20 dark:text-red-400 disabled:cursor-wait disabled:opacity-50"
+              className="rounded-md cursor-pointer bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-500 hover:bg-red-500/20 dark:text-red-400 disabled:cursor-wait disabled:opacity-50"
             >
               Yes
             </button>
@@ -127,7 +129,7 @@ const ProjectCard = ({ project, activeSession }) => {
             onClick={() => {
               setConfirmDelete(true);
             }}
-            className="flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:text-red-400"
+            className="flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-[11px] text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:text-red-400"
           >
             <Trash2 size={13} />
           </motion.div>
