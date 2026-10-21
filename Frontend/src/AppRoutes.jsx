@@ -5,6 +5,7 @@ import { me } from "./features/api/me";
 import { useDispatch } from "react-redux";
 import { setUserData } from "./redux/userSlice";
 import ProjectPage from "./pages/ProjectPage";
+import Plan from "./pages/Plan";
 
 const AppRoutes = () => {
 
@@ -26,6 +27,10 @@ const AppRoutes = () => {
         {
             path:"/project/:id",
             element:<ProjectPage/>
+        },
+        {
+            path:"/plan",
+            element:<Plan/>
         }
     ])
 
