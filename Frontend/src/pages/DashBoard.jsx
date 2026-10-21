@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import Navbar from "../components/Navbar";
 import SideBar from "../components/SideBar";
-import { Folder, Loader2, Plus } from "lucide-react";
+import { Folder, Loader2, Menu, Plus, X } from "lucide-react";
 import { getProjects, getStarredProjects } from "../features/api/project";
 import { setProjects } from "../redux/projectSlice";
 import { useEffect } from "react";
@@ -16,7 +16,8 @@ import CreateProjectModal from "../components/CreateProjectModal";
 
 const DashBoard = () => {
   const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const [activeSession, setActiveSession] = useState("projects");
   const [loadingProjects, setLoadingProjects] = useState(false);
   const dispatch = useDispatch();
@@ -65,7 +66,7 @@ const DashBoard = () => {
       <div className="relative items-center justify-center flex h-screen w-full overflow-hidden bg-slate-50 px-4 transition-colors duration-300 dark:bg-[#07070c]">
         <div className="pointer-events-none absolute -top-32 left-1/2 hidden h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-white/[0.05] blur-[120px] dark:block " />
 
-        <div className="relative w-full max-w-sm rounded-2xl border border-slate-200/7 bg-white/80 p-8 text-center shadow-xl shadow-slate-200/50 backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.03] dark:shadow-black/40 ">
+        <div className="relative w-full max-w-sm rounded-2xl border border-slate-200/7 bg-white/80 p-6 sm:p-8 text-center shadow-xl shadow-slate-200/50 backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.03] dark:shadow-black/40 ">
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-lg shadow-black/5 dark:border-transparent">
             <span className="text-lg font-bold text-slate-900 ">AI </span>
           </div>
@@ -106,13 +107,46 @@ const DashBoard = () => {
       <div className="relative flex min-h-0 flex-1 flex-col">
         <Navbar />
         <div className="flex min-h-0 flex-1">
-          <SideBar
-            activeSession={activeSession}
-            setActiveSession={setActiveSession}
-          />
+          <div className="hidden md:block">
+            <SideBar
+              activeSession={activeSession}
+              setActiveSession={setActiveSession}
+            />
+          </div>
+          {mobileSidebarOpen && (
+            <div className="fixed inset-0 z-40 md:hidden">
+              <div
+                onClick={() => setMobileSidebarOpen(false)}
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              />
+              <div className="absolute left-0 top-0 h-full w-72 max-w-[80vw] bg-slate-50 shadow-2xl dark:bg-[#0a0a10]">
+                <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200/70 dark:border-white/[0.07]">
+                  <span className="text-[13.5px] font-semibold text-slate-900 dark:text-white">
+                    Menu
+                  </span>
+                  <button
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/[0.06]"
+                    aria-label="Close menu"
+                  >
+                    <X size={18}/>
+                  </button>
+                </div>
+               <SideBar
+              activeSession={activeSession}
+              setActiveSession={setActiveSession}
+            />
+              </div>
+            </div>
+          )}
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-8 py-8 [scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.35)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-clip-padding hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 dark:hover:[&::-webkit-scrollbar-thumb]:bg-white/20">
-            <div className="mb-8 flex items-start justify-between">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 [scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.35)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-clip-padding hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 dark:hover:[&::-webkit-scrollbar-thumb]:bg-white/20">
+
+          <div onClick={()=>setMobileSidebarOpen(true)} className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-medium text-slate-600 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-slate-300 md:hidden">
+            <Menu size={14}/>Menu
+          </div>
+
+            <div className="mb-6 sm:mb-8 flex flex-col sm:items-start sm:justify-between sm:flex-row gap-3 sm:gap-4 ">
               <div>
                 <h1 className="flex items-center gap-2 text-[26px] font-bold text-slate-900 dark:text-white  ">
                   Welcome Back, {userData.name.split(" ")[0] || "User"}
@@ -123,7 +157,10 @@ const DashBoard = () => {
                   Ready to build Something Amazing Today ?
                 </p>
               </div>
-              <button onClick={()=>setOpenModal(true)} className="flex cursor-pointer shrink-0 items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-sm transition-opacity duration-150 hover:opacity-90 dark:bg-white dark:text-slate-900">
+              <button
+                onClick={() => setOpenModal(true)}
+                className="flex cursor-pointer shrink-0 items-center sm:text-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-sm transition-opacity duration-150 hover:opacity-90 dark:bg-white dark:text-slate-900"
+              >
                 <Plus size={16} />
                 New Project
               </button>
@@ -153,28 +190,35 @@ const DashBoard = () => {
                   />
                 </div>
 
-                <h3 className=" mb-1.5 text-[16px] font-semibold text-slate-900 dark:text-white  "> {activeSession=="starred" ?"No Starred projects":"No Projects Yet"}</h3>
-                <p className=" mb-5 max-w-xs text-[13px] text-slate-500 dark:text-slate-500 "> {activeSession=="starred" ?"Star a project to see here":"Create your first project and Start Buildimg Something amazing !"}</p>
-
+                <h3 className=" mb-1.5 text-[16px] font-semibold text-slate-900 dark:text-white  ">
+                  {" "}
+                  {activeSession == "starred"
+                    ? "No Starred projects"
+                    : "No Projects Yet"}
+                </h3>
+                <p className=" mb-5 max-w-xs text-[13px] text-slate-500 dark:text-slate-500 ">
+                  {" "}
+                  {activeSession == "starred"
+                    ? "Star a project to see here"
+                    : "Create your first project and Start Buildimg Something amazing !"}
+                </p>
               </div>
             ) : (
-             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 ">
-                {projects.map((p,i)=>(
-                    <ProjectCard project={p} activeSession={activeSession}/>
+              <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 ">
+                {projects.map((p, i) => (
+                  <ProjectCard project={p} activeSession={activeSession} />
                 ))}
-             </div>
+              </div>
             )}
           </div>
         </div>
       </div>
-{openModal && <CreateProjectModal 
-    open={openModal} 
-    onClose={()=>setOpenModal(false)}
-    />}
-   
-
-
-
+      {openModal && (
+        <CreateProjectModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+        />
+      )}
     </div>
   );
 };
