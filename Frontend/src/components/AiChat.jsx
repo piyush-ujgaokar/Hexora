@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 const TOOL_META = {
   folder_created: {
@@ -56,6 +58,8 @@ const ToolBadge = ({ toolType, detail }) => {
 };
 
 const AiChat = ({ projectId, history = [], reloadTree, onFilesChanged }) => {
+  const dispatch = useDispatch();
+  const { userData } = useSelector((state) => state.user);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,6 +67,10 @@ const AiChat = ({ projectId, history = [], reloadTree, onFilesChanged }) => {
   console.log("messages are:-", messages);
 
   const onEvent = async (toolType, data) => {
+    if (toolType === "credits") {
+      dispatch(setUserData({ ...userData, credits: data.credits }));
+    }
+
     if (toolType == "file_created") {
       reloadTree();
       setMessages((prev) => [

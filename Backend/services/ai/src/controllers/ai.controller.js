@@ -23,8 +23,6 @@ const buildHistory = (history) => {
 };
 
 
-
-
 const sendEvent = (res, type, data) => {
   if (res.writableEnded || res.destroyed) {
     return false;
@@ -94,7 +92,8 @@ export const chat = async (req, res) => {
     )
 
 
-    await deductCredits({userId,amount:10})
+    const creditBalance = await deductCredits({userId,amount:10})
+    sendEvent(res, "credits", creditBalance)
 
 
 

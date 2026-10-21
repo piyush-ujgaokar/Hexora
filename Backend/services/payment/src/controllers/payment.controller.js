@@ -43,7 +43,8 @@ export const createOrderController = async (req, res) => {
 
     const payment = await paymentModel.create({
       userId,
-      paln,
+      plan,
+      credits:selectedPlan.credits,
       amount: selectedPlan.amount,
       razorpayOrderId: order.id,
       currency: "INR",
@@ -91,6 +92,7 @@ export const verifyPaymentController = async (req, res) => {
 
     const payment = await paymentModel.findOne({
       razorpayOrderId: razorpay_order_id,
+      userId,
     });
 
     if (!payment) {
@@ -100,7 +102,7 @@ export const verifyPaymentController = async (req, res) => {
     }
 
     if (payment.status == "paid") {
-      return res.status(400).json({
+      return res.status(200).json({
         message: "Payment is Already verified",
       });
     }
@@ -118,16 +120,21 @@ export const verifyPaymentController = async (req, res) => {
         })
     }
 
+    const credits = await addCredits({
+      userId: payment.userId,
+      credits: payment.credits,
+    });
+    if (typeof credits !== "number") {
+      throw new Error("Auth service did not return the updated credit balance");
+    }
+
     payment.status="paid"
     payment.razorpayPaymentId=razorpay_payment_id
     await payment.save()
 
-
-    const data=await addCredits({userId,credits:payment.credits})
-
-
      return res.status(201).json({
       message: "Payment Verified Successfully",
+      credits,
     });
 
 

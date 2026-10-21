@@ -78,9 +78,9 @@ export const logoutController=async(req,res)=>{
 export const deductCreditsController=async(req,res)=>{
     try {
         const {userId,amount}=req.body
-        if(!userId){
+        if(!userId || !Number.isFinite(Number(amount)) || Number(amount) <= 0){
             return res.status(404).json({
-                message:"UserId not Found"
+                message:"UserId and a valid credit amount are required"
             })
         }
 
@@ -90,7 +90,7 @@ export const deductCreditsController=async(req,res)=>{
             }
         },{
             returnDocument:"after"
-        }).select("credits")
+        })
 
         if(!user){
             return res.status(400).json({
@@ -100,13 +100,15 @@ export const deductCreditsController=async(req,res)=>{
 
         const sessionId=await redis.get(`user-session-${userId}`)
 
-        await redis.set(`session-${sessionId}`,JSON.stringify({
+        if (sessionId) {
+          await redis.set(`session-${sessionId}`,JSON.stringify({
             name:user.name,
             _id:user._id,
             email:user.email,
             avatar:user.avatar,
             credits:user.credits
-        }),"EX",7*24*60*60)
+          }),"EX",7*24*60*60)
+        }
 
         return res.status(200).json({
             credits:user.credits
@@ -139,8 +141,8 @@ export const addCreditsController=async(req,res)=>{
             })
         }
 
-        user.credits=(user.credits||0)+credits
-        user.save()
+        user.credits=(user.credits||0)+Number(credits)
+       await user.save()
 
         const sessionId=await redis.get(`user-session-${userId}`)
 

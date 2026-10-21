@@ -1,6 +1,9 @@
 import { ArrowLeft, Check, Crown, Icon, Sparkle, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { createPaymentApi, verifyPaymentApi } from "../features/api/payment";
+import { setUserData } from "../redux/userSlice";
 
 const plans = [
   {
@@ -65,6 +68,55 @@ const plans = [
 
 const Plan = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { userData } = useSelector((state) => state.user);
+  const handlePayment=async(plan)=>{
+    try {
+        if(plan.key=="free" || plan.current) return
+        const data=await createPaymentApi(plan.key)
+        if (!data?.order?.id || !data?.key_id) {
+          throw new Error("Could not create payment order");
+        }
+        console.log(data);
+const options={
+    key:data.key_id,
+    amount:data.order.amount,
+    currency:data.order.currency || "INR",
+    name:"Hexora IDE",
+    description:`Plan ${plan.name}`,
+    order_id:data.order.id,
+    handler:async(response)=>{
+        try {
+          const {razorpay_order_id, razorpay_payment_id, razorpay_signature}=response
+          const data=await verifyPaymentApi({razorpay_order_id, razorpay_payment_id, razorpay_signature})
+
+          if (typeof data?.credits !== "number") {
+            throw new Error(data?.message || "Payment was verified but credits were not returned");
+          }
+          dispatch(setUserData({ ...userData, credits: data.credits }));
+          window.alert(`Payment successful. Your new balance is ${data.credits} credits.`);
+        } catch (error) {
+          console.error("Payment verification failed:", error);
+          window.alert(error.response?.data?.message || error.message || "Payment verification failed");
+        }
+    },
+    modal: {
+        ondismiss: () => console.log("Payment was cancelled"),
+    },
+    theme:{
+        color:"$4f46e5"
+    }
+}
+        const razorpay=new window.Razorpay(options)
+        razorpay.open()
+
+        
+    } catch (error) {
+            console.error("Payment failed:", error);
+            window.alert(error.response?.data?.message || error.message || "Payment failed");
+            
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 px-5 py-8 text-slate-900 dark:bg-[#07070c] dark:text-white">
@@ -173,6 +225,7 @@ const Plan = () => {
                 </div>
 
                 <button
+                onClick={()=>handlePayment(plan)}
                   className={`
                 mt-5 w-full rounded-lg cursor-pointer py-2.5 text-xs font-semibold transition
                 ${plan.current ? `cursor-default bg-slat-100 text-slate-400 dark:bg-white/[0.06] dark:text-slate-600` : plan.popular ? `bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-500` : `bg-slate-900 text-white hover:opacity-90 dark:bg-white dark:text-slate-900`}
@@ -206,7 +259,7 @@ const Plan = () => {
                 </div>
 
 
-                
+
               </motion.div>
             );
           })}
